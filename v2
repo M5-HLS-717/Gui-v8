@@ -98,15 +98,16 @@ Label.Parent = Prefabs
 Label.BackgroundColor3 = Color3.new(1, 1, 1)
 Label.BackgroundTransparency = 1
 Label.Size = UDim2.new(0, 200, 0, 20)
-Title.Font = Enum.Font.Creepster       -- Label fontu ile birebir aynı
-Title.Text = "Gamer Time"              -- Scriptin ana ismi
-Title.TextColor3 = Color3.new(1, 1, 1) -- Beyaz yazı
-Title.TextSize = 17                     -- Label boyutu ile aynı
+-- Window başlığı label stiliyle aynı olacak
+Title.Font = Enum.Font.Creepster       -- Label fontu
+Title.TextSize = 17                     -- Label boyutu
+Title.TextColor3 = Color3.new(1, 1, 1) -- Beyaz
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.TextYAlignment = Enum.TextYAlignment.Center
 Title.RichText = true
 Title.TextStrokeTransparency = 0.2
 Title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
 
 
 
