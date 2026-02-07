@@ -1919,7 +1919,122 @@ function bd:AddWindow(bi, bj)
                 end
                 function bU:AddHorizontalAlignment()
                     local du = {}
-                    local dv = c:FindFirstChild("HorizontalAlignment"):Clone()
+                    local dv = c:FindFirstChild("Horfunction bU:AddFolder(dx)
+    local dy = {}
+    dx = tostring(dx or "New Folder")
+    local dz = c:FindFirstChild("Folder"):Clone()
+    local b5 = dz:FindFirstChild("Button")
+    local cZ = dz:FindFirstChild("Objects")
+    local dA = b5:FindFirstChild("Toggle")
+    
+    dz.ZIndex = dz.ZIndex + bc * 10
+    b5.ZIndex = b5.ZIndex + bc * 10
+    cZ.ZIndex = cZ.ZIndex + bc * 10
+    dA.ZIndex = dA.ZIndex + bc * 10
+    b5:GetChildren()[1].ZIndex = b5:GetChildren()[1].ZIndex + bc * 10
+    
+    local c1 = c0:FindFirstChild("TabScroller")
+    dz.Parent = c1 or c0
+    b5.Text = "      " .. dx
+    local cp = b5:GetChildren()[1]
+    cp.ImageColor3 = bj.main_color
+    
+    -- Optimize edilmiş boyut hesaplama fonksiyonu
+    local function dB()
+        local totalHeight = 25
+        local children = cZ:GetChildren()
+        
+        for i = 1, #children do
+            local child = children[i]
+            if not child:IsA("UIListLayout") then
+                if child:IsA("Frame") or child:IsA("TextButton") then
+                    totalHeight = totalHeight + child.AbsoluteSize.Y + 5
+                end
+            end
+        end
+        return totalHeight
+    end
+    
+    local bF = false
+    local dC = nil
+    
+    b5.MouseButton1Click:Connect(
+        function()
+            bF = not bF
+            
+            if bF then
+                -- Açılma animasyonu
+                az(dA, {Rotation = 90}, bj.tween_time)
+                cZ.Visible = true
+                
+                -- Smooth açılma efekti için RunService kullan
+                if dC then
+                    dC:Disconnect()
+                end
+                
+                dC = an.Heartbeat:Connect(function()
+                    if dz and dz.Parent and bF then
+                        local targetHeight = dB()
+                        az(dz, {Size = UDim2.new(1, 0, 0, targetHeight)}, 0.05)
+                    else
+                        if dC then
+                            dC:Disconnect()
+                            dC = nil
+                        end
+                    end
+                end)
+                
+            else
+                -- Kapanma animasyonu
+                az(dA, {Rotation = 0}, bj.tween_time)
+                
+                -- Önce boyutu küçült
+                az(dz, {Size = UDim2.new(1, 0, 0, 20)}, bj.tween_time)
+                
+                -- Animasyon bittikten sonra görünürlüğü kapat
+                task.delay(bj.tween_time + 0.05, function()
+                    if dz and dz.Parent then
+                        cZ.Visible = false
+                        if dC then
+                            dC:Disconnect()
+                            dC = nil
+                        end
+                    end
+                end)
+            end
+        end
+    )
+    
+    -- İçerik eklendiğinde/çıkarıldığında boyutu güncelle
+    local layout = cZ:FindFirstChildOfClass("UIListLayout")
+    if layout then
+        layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(
+            function()
+                if bF and dz and dz.Parent then
+                    local newHeight = dB()
+                    az(dz, {Size = UDim2.new(1, 0, 0, newHeight)}, 0.1)
+                end
+            end
+        )
+    end
+    
+    -- Folder'ın içindeki öğeler için metodları kopyala
+    for bh, aW in pairs(bU) do
+        if bh ~= "AddFolder" then -- Kendini kopyalama
+            dy[bh] = function(...)
+                local dw = {bU[bh](...)}
+                local aZ = dw[#dw]
+                if aZ then
+                    aZ.Parent = cZ
+                end
+                return table.unpack(dw)
+            end
+        end
+    end
+    
+    return dy, dz
+end 
+izontalAlignment"):Clone()
                     local c1 = c0:FindFirstChild("TabScroller")
                     dv.Parent = c1 or c0
                     function du:AddButton(...)
@@ -1930,112 +2045,7 @@ function bd:AddWindow(bi, bj)
                     end
                     return du, dv
                 end
-                function bU:AddFolder(dx)
-                    local dy = {}
-                    dx = tostring(dx or "New Folder")
-                    local dz = c:FindFirstChild("Folder"):Clone()
-                    local b5 = dz:FindFirstChild("Button")
-                    local cZ = dz:FindFirstChild("Objects")
-                    local dA = b5:FindFirstChild("Toggle")
-                    dz.ZIndex = dz.ZIndex + bc * 10
-                    b5.ZIndex = b5.ZIndex + bc * 10
-                    cZ.ZIndex = cZ.ZIndex + bc * 10
-                    dA.ZIndex = dA.ZIndex + bc * 10
-                    b5:GetChildren()[1].ZIndex = b5:GetChildren()[1].ZIndex + bc * 10
-                    local c1 = c0:FindFirstChild("TabScroller")
-                    dz.Parent = c1 or c0
-                    b5.Text = "      " .. dx
-                    local cp = b5:GetChildren()[1]
-                    cp.ImageColor3 = bj.main_color
-                    local function dB()
-                        local d7 = 25
-                        for aw, aW in ipairs(cZ:GetChildren()) do
-                            if not aW:IsA("UIListLayout") then
-                                d7 = d7 + aW.AbsoluteSize.Y + 5
-                            end
-                        end
-                        return d7
-                    end
-                    local bF = false
-                    local dC
-                    b5.MouseButton1Click:Connect(
-                        function()
-                            bF = not bF
-                            if bF then
-                                -- Açılma efekti
-                                local dD = Instance.new("Frame")
-                                dD.Name = "FolderOpenEffect"
-                                dD.BackgroundColor3 = bj.main_color
-                                dD.BackgroundTransparency = 0.8
-                                dD.Size = UDim2.new(0, 2, 0, 0)
-                                dD.Position = UDim2.new(0, 0, 0, 0)
-                                dD.ZIndex = cZ.ZIndex + 5
-                                dD.Parent = dz
-                                
-                                az(dA, {Rotation = 90}, bj.tween_time)
-                                cZ.Visible = true
-                                
-                                -- Efekt animasyonu
-                                az(dD, {Size = UDim2.new(0, 2, 0, dB())}, 0.3)
-                                task.wait(0.3)
-                                if dD and dD.Parent then
-                                    dD:Destroy()
-                                end
-                                
-                                if dC then
-                                    dC:Disconnect()
-                                end
-                                dC =
-                                    an.Heartbeat:Connect(
-                                    function()
-                                        if bF then
-                                            dz.Size = UDim2.new(1, 0, 0, dB())
-                                        else
-                                            if dC then
-                                                dC:Disconnect()
-                                                dC = nil
-                                            end
-                                        end
-                                    end
-                                )
-                            else
-                                -- Kapanma efekti
-                                local dE = Instance.new("Frame")
-                                dE.Name = "FolderCloseEffect"
-                                dE.BackgroundColor3 = bj.main_color
-                                dE.BackgroundTransparency = 0.8
-                                dE.Size = UDim2.new(0, 2, 0, dB())
-                                dE.Position = UDim2.new(0, 0, 0, 0)
-                                dE.ZIndex = cZ.ZIndex + 5
-                                dE.Parent = dz
-                                
-                                az(dE, {Size = UDim2.new(0, 2, 0, 0)}, 0.3)
-                                az(dA, {Rotation = 0}, bj.tween_time)
-                                
-                                task.wait(0.3)
-                                if dE and dE.Parent then
-                                    dE:Destroy()
-                                end
-                                
-                                cZ.Visible = false
-                                dz.Size = UDim2.new(1, 0, 0, 20)
-                                if dC then
-                                    dC:Disconnect()
-                                    dC = nil
-                                end
-                            end
-                        end
-                    )
-                    for bh, aW in pairs(bU) do
-                        dy[bh] = function(...)
-                            local dw = {aW(...)}
-                            local aZ = dw[#dw]
-                            aZ.Parent = cZ
-                            return table.unpack(dw)
-                        end
-                    end
-                    return dy, dz
-                end
+                
             end
             return bU, c0
         end
