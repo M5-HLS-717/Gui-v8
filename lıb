@@ -1,3 +1,12 @@
+--[[
+    HorizonUI — Elerium Syntax Edition
+    Syntax tamamen Elerium UI ile uyumlu hale getirildi.
+    Yeni özellikler:
+      • Minimize modunda 👑 + başlık düzgün gösterilir (taşma yok)
+      • AddWindow / AddTab / AddSection / AddFolder API'si Elerium ile birebir
+      • Tüm eski Section metodları korundu (AddToggle, AddSlider, AddDropdown, AddButton, AddLabel, AddInput, AddColorPicker, AddKeybind)
+--]]
+
 local Players          = game:GetService("Players")
 local TweenService     = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -13,85 +22,38 @@ local GUI_W     = isMobile and 580 or 820
 local GUI_H     = isMobile and 370 or 510
 local SIDEBAR_W = isMobile and 190 or 210
 
+-- ─── Temalar ──────────────────────────────────────────────────────────────────
 local Themes = {
-	{
-		name       = "Horizon",
-		accent1    = Color3.fromRGB(99,  102, 241),
-		accent2    = Color3.fromRGB(168,  85, 247),
-		background = Color3.fromRGB(9,    9,  14),
-		sidebar    = Color3.fromRGB(13,  13,  20),
-		text       = Color3.fromRGB(240, 240, 250),
-		subtext    = Color3.fromRGB(140, 140, 165),
-		stroke     = Color3.fromRGB(50,  50,  80),
-		elementBg  = Color3.fromRGB(18,  18,  28),
-		toggleOff  = Color3.fromRGB(45,  45,  65),
-		trackBg    = Color3.fromRGB(38,  38,  58),
-	},
-	{
-		name       = "Neon",
-		accent1    = Color3.fromRGB(0,   255, 200),
-		accent2    = Color3.fromRGB(0,   180, 255),
-		background = Color3.fromRGB(5,   10,  14),
-		sidebar    = Color3.fromRGB(7,   14,  20),
-		text       = Color3.fromRGB(230, 250, 255),
-		subtext    = Color3.fromRGB(120, 170, 190),
-		stroke     = Color3.fromRGB(0,   80, 100),
-		elementBg  = Color3.fromRGB(10,  20,  28),
-		toggleOff  = Color3.fromRGB(30,  55,  65),
-		trackBg    = Color3.fromRGB(25,  50,  65),
-	},
-	{
-		name       = "Rose",
-		accent1    = Color3.fromRGB(244,  63,  94),
-		accent2    = Color3.fromRGB(251, 113, 133),
-		background = Color3.fromRGB(12,   7,   9),
-		sidebar    = Color3.fromRGB(17,  10,  13),
-		text       = Color3.fromRGB(255, 240, 245),
-		subtext    = Color3.fromRGB(180, 140, 155),
-		stroke     = Color3.fromRGB(80,  30,  45),
-		elementBg  = Color3.fromRGB(22,  13,  18),
-		toggleOff  = Color3.fromRGB(65,  35,  45),
-		trackBg    = Color3.fromRGB(55,  30,  40),
-	},
-	{
-		name       = "Ocean",
-		accent1    = Color3.fromRGB(56,  189, 248),
-		accent2    = Color3.fromRGB(99,  102, 241),
-		background = Color3.fromRGB(7,   12,  18),
-		sidebar    = Color3.fromRGB(10,  16,  24),
-		text       = Color3.fromRGB(230, 245, 255),
-		subtext    = Color3.fromRGB(120, 160, 190),
-		stroke     = Color3.fromRGB(30,  70, 110),
-		elementBg  = Color3.fromRGB(14,  22,  34),
-		toggleOff  = Color3.fromRGB(35,  60,  85),
-		trackBg    = Color3.fromRGB(30,  55,  80),
-	},
-	{
-		name       = "Gold",
-		accent1    = Color3.fromRGB(251, 191,  36),
-		accent2    = Color3.fromRGB(245, 158,  11),
-		background = Color3.fromRGB(13,  11,   6),
-		sidebar    = Color3.fromRGB(18,  15,   8),
-		text       = Color3.fromRGB(255, 250, 235),
-		subtext    = Color3.fromRGB(180, 165, 120),
-		stroke     = Color3.fromRGB(90,  70,  20),
-		elementBg  = Color3.fromRGB(22,  18,  10),
-		toggleOff  = Color3.fromRGB(65,  55,  25),
-		trackBg    = Color3.fromRGB(58,  48,  22),
-	},
-	{
-		name       = "Sakura",
-		accent1    = Color3.fromRGB(236,  72, 153),
-		accent2    = Color3.fromRGB(168,  85, 247),
-		background = Color3.fromRGB(12,   8,  14),
-		sidebar    = Color3.fromRGB(17,  11,  19),
-		text       = Color3.fromRGB(255, 240, 255),
-		subtext    = Color3.fromRGB(190, 155, 210),
-		stroke     = Color3.fromRGB(90,  40, 110),
-		elementBg  = Color3.fromRGB(22,  14,  26),
-		toggleOff  = Color3.fromRGB(68,  40,  80),
-		trackBg    = Color3.fromRGB(60,  35,  72),
-	},
+	{ name="Horizon", accent1=Color3.fromRGB(99,102,241),  accent2=Color3.fromRGB(168,85,247),
+	  background=Color3.fromRGB(9,9,14),    sidebar=Color3.fromRGB(13,13,20),
+	  text=Color3.fromRGB(240,240,250),     subtext=Color3.fromRGB(140,140,165),
+	  stroke=Color3.fromRGB(50,50,80),      elementBg=Color3.fromRGB(18,18,28),
+	  toggleOff=Color3.fromRGB(45,45,65),   trackBg=Color3.fromRGB(38,38,58) },
+	{ name="Neon",    accent1=Color3.fromRGB(0,255,200),   accent2=Color3.fromRGB(0,180,255),
+	  background=Color3.fromRGB(5,10,14),   sidebar=Color3.fromRGB(7,14,20),
+	  text=Color3.fromRGB(230,250,255),     subtext=Color3.fromRGB(120,170,190),
+	  stroke=Color3.fromRGB(0,80,100),      elementBg=Color3.fromRGB(10,20,28),
+	  toggleOff=Color3.fromRGB(30,55,65),   trackBg=Color3.fromRGB(25,50,65) },
+	{ name="Rose",    accent1=Color3.fromRGB(244,63,94),   accent2=Color3.fromRGB(251,113,133),
+	  background=Color3.fromRGB(12,7,9),    sidebar=Color3.fromRGB(17,10,13),
+	  text=Color3.fromRGB(255,240,245),     subtext=Color3.fromRGB(180,140,155),
+	  stroke=Color3.fromRGB(80,30,45),      elementBg=Color3.fromRGB(22,13,18),
+	  toggleOff=Color3.fromRGB(65,35,45),   trackBg=Color3.fromRGB(55,30,40) },
+	{ name="Ocean",   accent1=Color3.fromRGB(56,189,248),  accent2=Color3.fromRGB(99,102,241),
+	  background=Color3.fromRGB(7,12,18),   sidebar=Color3.fromRGB(10,16,24),
+	  text=Color3.fromRGB(230,245,255),     subtext=Color3.fromRGB(120,160,190),
+	  stroke=Color3.fromRGB(30,70,110),     elementBg=Color3.fromRGB(14,22,34),
+	  toggleOff=Color3.fromRGB(35,60,85),   trackBg=Color3.fromRGB(30,55,80) },
+	{ name="Gold",    accent1=Color3.fromRGB(251,191,36),  accent2=Color3.fromRGB(245,158,11),
+	  background=Color3.fromRGB(13,11,6),   sidebar=Color3.fromRGB(18,15,8),
+	  text=Color3.fromRGB(255,250,235),     subtext=Color3.fromRGB(180,165,120),
+	  stroke=Color3.fromRGB(90,70,20),      elementBg=Color3.fromRGB(22,18,10),
+	  toggleOff=Color3.fromRGB(65,55,25),   trackBg=Color3.fromRGB(58,48,22) },
+	{ name="Sakura",  accent1=Color3.fromRGB(236,72,153),  accent2=Color3.fromRGB(168,85,247),
+	  background=Color3.fromRGB(12,8,14),   sidebar=Color3.fromRGB(17,11,19),
+	  text=Color3.fromRGB(255,240,255),     subtext=Color3.fromRGB(190,155,210),
+	  stroke=Color3.fromRGB(90,40,110),     elementBg=Color3.fromRGB(22,14,26),
+	  toggleOff=Color3.fromRGB(68,40,80),   trackBg=Color3.fromRGB(60,35,72) },
 }
 
 local Icons = {
@@ -104,6 +66,7 @@ local Icons = {
 	star     = "rbxassetid://10734966248",
 }
 
+-- ─── Yardımcılar ──────────────────────────────────────────────────────────────
 local function MakeCorner(parent, radius)
 	local c = Instance.new("UICorner")
 	c.CornerRadius = UDim.new(0, radius or s(10))
@@ -122,35 +85,27 @@ end
 
 local function MakeGradient(parent, c1, c2)
 	local g = Instance.new("UIGradient")
-	g.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, c1),
-		ColorSequenceKeypoint.new(1, c2),
-	})
+	g.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0,c1), ColorSequenceKeypoint.new(1,c2) })
 	g.Parent = parent
 	return g
 end
 
 local function UpdateGradient(g, c1, c2)
 	if not g then return end
-	g.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, c1),
-		ColorSequenceKeypoint.new(1, c2),
-	})
+	g.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0,c1), ColorSequenceKeypoint.new(1,c2) })
 end
 
 local function Tween(obj, props, t, style, dir)
-	TweenService:Create(
-		obj,
+	TweenService:Create(obj,
 		TweenInfo.new(t or 0.25, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out),
-		props
-	):Play()
+		props):Play()
 end
 
 local function MakeIcon(parent, asset, size, color)
 	local img = Instance.new("ImageLabel")
 	img.Size                   = UDim2.new(0, size or s(14), 0, size or s(14))
 	img.AnchorPoint            = Vector2.new(0.5, 0.5)
-	img.Position               = UDim2.new(0.5, 0, 0.5, 0)
+	img.Position               = UDim2.new(0.5,0,0.5,0)
 	img.BackgroundTransparency = 1
 	img.Image                  = asset or ""
 	img.ImageColor3            = color or Color3.fromRGB(255,255,255)
@@ -158,16 +113,18 @@ local function MakeIcon(parent, asset, size, color)
 	return img
 end
 
+-- ─── Ana Sınıflar ─────────────────────────────────────────────────────────────
 local HorizonUI = {}
 HorizonUI.__index = HorizonUI
 
-local Tab     = {}
-Tab.__index   = Tab
-local Section = {}
-Section.__index = Section
+local Tab     = {}; Tab.__index = Tab
+local Section = {}; Section.__index = Section
 
 local _state = { themeIndex = 1 }
 
+-- ══════════════════════════════════════════════════════════════════════════════
+--  HorizonUI.new  (Elerium: bd:AddWindow ile eşdeğer)
+-- ══════════════════════════════════════════════════════════════════════════════
 function HorizonUI.new(title)
 	local self = setmetatable({}, HorizonUI)
 	self.title       = title or "Horizon"
@@ -183,14 +140,19 @@ function HorizonUI.new(title)
 	return self
 end
 
-function HorizonUI:_theme()
-	return Themes[_state.themeIndex]
+-- Elerium uyumlu alias: HorizonUI:AddWindow(title) → HorizonUI.new(title)
+local HorizonLib = {}
+HorizonLib.__index = HorizonLib
+function HorizonLib:AddWindow(title, opts)
+	return HorizonUI.new(title)
 end
 
+function HorizonUI:_theme() return Themes[_state.themeIndex] end
 function HorizonUI:_regTheme(element, kind, extra)
-	table.insert(self._themeReg, { element = element, kind = kind, extra = extra })
+	table.insert(self._themeReg, { element=element, kind=kind, extra=extra })
 end
 
+-- ─── Arayüz İnşası ────────────────────────────────────────────────────────────
 function HorizonUI:_build()
 	local theme = self:_theme()
 
@@ -201,13 +163,13 @@ function HorizonUI:_build()
 	self.gui.Parent         = self.playerGui
 
 	self.main = Instance.new("Frame")
-	self.main.Name                  = "Main"
-	self.main.Size                  = UDim2.new(0, GUI_W, 0, GUI_H)
-	self.main.Position              = UDim2.new(0.5, -GUI_W/2, 0.5, -GUI_H/2)
-	self.main.BackgroundColor3      = theme.background
+	self.main.Name                   = "Main"
+	self.main.Size                   = UDim2.new(0, GUI_W, 0, GUI_H)
+	self.main.Position               = UDim2.new(0.5, -GUI_W/2, 0.5, -GUI_H/2)
+	self.main.BackgroundColor3       = theme.background
 	self.main.BackgroundTransparency = 0.08
-	self.main.BorderSizePixel       = 0
-	self.main.Parent                = self.gui
+	self.main.BorderSizePixel        = 0
+	self.main.Parent                 = self.gui
 	MakeCorner(self.main, s(18))
 	self.mainStroke = MakeStroke(self.main, theme.stroke, 0.5, 1)
 
@@ -226,6 +188,7 @@ function HorizonUI:_build()
 	self:_animateIn()
 end
 
+-- ─── Kontroller (minimize / kapat) ────────────────────────────────────────────
 function HorizonUI:_buildControls()
 	local theme = self:_theme()
 
@@ -274,6 +237,7 @@ function HorizonUI:_buildControls()
 	end)
 end
 
+-- ─── Sidebar ──────────────────────────────────────────────────────────────────
 function HorizonUI:_buildSidebar()
 	local theme = self:_theme()
 
@@ -287,7 +251,7 @@ function HorizonUI:_buildSidebar()
 	MakeCorner(self.sidebar, s(18))
 	self.sidebarStroke = MakeStroke(self.sidebar, theme.stroke, 0.6, 1)
 
-	-- YENİ EKLENEN: VS Code / macOS tarzı noktalar (Traffic Lights)
+	-- macOS trafik ışıkları
 	local windowControls = Instance.new("Frame")
 	windowControls.Size               = UDim2.new(0, s(54), 0, s(12))
 	windowControls.Position           = UDim2.new(0, s(14), 0, s(16))
@@ -295,22 +259,21 @@ function HorizonUI:_buildSidebar()
 	windowControls.Parent             = self.sidebar
 
 	local macColors = {
-		Color3.fromRGB(255, 95, 86),  -- Kırmızı
-		Color3.fromRGB(255, 189, 46), -- Sarı
-		Color3.fromRGB(39, 201, 63)   -- Yeşil
+		Color3.fromRGB(255,95,86),
+		Color3.fromRGB(255,189,46),
+		Color3.fromRGB(39,201,63),
 	}
-
 	for i, color in ipairs(macColors) do
 		local dot = Instance.new("Frame")
 		dot.Size             = UDim2.new(0, s(12), 0, s(12))
-		dot.Position         = UDim2.new(0, (i-1) * s(20), 0, 0)
+		dot.Position         = UDim2.new(0, (i-1)*s(20), 0, 0)
 		dot.BackgroundColor3 = color
 		dot.BorderSizePixel  = 0
 		dot.Parent           = windowControls
 		MakeCorner(dot, s(6))
 	end
 
-	-- Logo Alanını noktaların altına kaydırdık (s(38))
+	-- Logo alanı
 	local logoArea = Instance.new("Frame")
 	logoArea.Size               = UDim2.new(1, -s(24), 0, s(52))
 	logoArea.Position           = UDim2.new(0, s(12), 0, s(38))
@@ -341,7 +304,7 @@ function HorizonUI:_buildSidebar()
 	self.tabsContainer = Instance.new("Frame")
 	self.tabsContainer.Name              = "Tabs"
 	self.tabsContainer.Size              = UDim2.new(1, 0, 1, -s(200))
-	self.tabsContainer.Position          = UDim2.new(0, 0, 0, s(104)) -- Aşağı kaydı
+	self.tabsContainer.Position          = UDim2.new(0, 0, 0, s(104))
 	self.tabsContainer.BackgroundTransparency = 1
 	self.tabsContainer.Parent           = self.sidebar
 
@@ -363,8 +326,6 @@ function HorizonUI:_buildUserCard()
 	self._userCardStroke = MakeStroke(card, theme.stroke, 0.6, 1)
 
 	local avatarSize = s(38)
-	
-	-- YENİ EKLENEN: Gerçek Roblox Profil Fotoğrafı (HeadShot)
 	local avatar = Instance.new("ImageLabel")
 	avatar.Size             = UDim2.new(0, avatarSize, 0, avatarSize)
 	avatar.Position         = UDim2.new(0, s(10), 0.5, -avatarSize/2)
@@ -376,7 +337,6 @@ function HorizonUI:_buildUserCard()
 
 	local nameX = avatarSize + s(14)
 
-	-- YENİ EKLENEN: DisplayName ve altındaki @KullanıcıAdı Düzeni
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Size              = UDim2.new(1, -(nameX + s(8)), 0, s(18))
 	nameLabel.Position          = UDim2.new(0, nameX, 0, s(12))
@@ -418,6 +378,7 @@ function HorizonUI:_buildContent()
 	self.contentContainer.Parent           = self.contentArea
 end
 
+-- ─── Drag ─────────────────────────────────────────────────────────────────────
 function HorizonUI:_setupDrag()
 	local dragging, dragStart, startPos = false, nil, nil
 	UserInputService.InputBegan:Connect(function(inp)
@@ -452,6 +413,7 @@ function HorizonUI:_setupDrag()
 	end)
 end
 
+-- ─── Hotkey (Insert) ──────────────────────────────────────────────────────────
 function HorizonUI:_setupHotkey()
 	UserInputService.InputBegan:Connect(function(inp, gp)
 		if gp then return end
@@ -476,37 +438,109 @@ function HorizonUI:_animateIn()
 	Tween(self.main, {Size=UDim2.new(0,GUI_W,0,GUI_H), Position=UDim2.new(0.5,-GUI_W/2,0.5,-GUI_H/2)}, 0.75, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 end
 
+-- ════════════════════════════════════════════════════════════════════════════
+--  Minimize — DÜZELTİLDİ: Kral tacı 👑 + başlık, taşma olmadan gösterilir
+-- ════════════════════════════════════════════════════════════════════════════
+local MIN_W   = s(220)
+local MIN_H   = s(42)
+local PILL_R  = s(21) -- sol hap yarıçapı (yuvarlak bölge genişliği)
+
+function HorizonUI:_buildMinimizedBadge()
+	if self._minBadge then self._minBadge:Destroy() end
+
+	local badge = Instance.new("Frame")
+	badge.Name               = "MinBadge"
+	badge.Size               = UDim2.new(0, PILL_R*2, 0, MIN_H)
+	badge.Position           = UDim2.new(0, 0, 0, 0)
+	badge.BackgroundColor3   = Color3.fromRGB(255,255,255)
+	badge.BackgroundTransparency = 0.88
+	badge.BorderSizePixel    = 0
+	badge.Parent             = self.main
+	MakeCorner(badge, MIN_H/2)
+
+	-- Gradient
+	local bg = Instance.new("Frame")
+	bg.Size               = UDim2.new(1,0,1,0)
+	bg.BackgroundColor3   = self:_theme().accent1
+	bg.BackgroundTransparency = 0.6
+	bg.BorderSizePixel    = 0
+	bg.Parent             = badge
+	MakeCorner(bg, MIN_H/2)
+	MakeGradient(bg, self:_theme().accent1, self:_theme().accent2)
+
+	-- Kral tacı 👑 (emoji TextLabel)
+	local crown = Instance.new("TextLabel")
+	crown.Size              = UDim2.new(0, PILL_R*2, 0, MIN_H)
+	crown.BackgroundTransparency = 1
+	crown.Text              = "👑"
+	crown.TextSize          = s(18)
+	crown.Font              = Enum.Font.GothamBold
+	crown.TextXAlignment    = Enum.TextXAlignment.Center
+	crown.TextYAlignment    = Enum.TextYAlignment.Center
+	crown.Parent            = badge
+
+	-- Başlık (tacın sağında, kırpmalı)
+	local titleLbl = Instance.new("TextLabel")
+	titleLbl.Size              = UDim2.new(1, -(PILL_R*2 + s(10)), 0, MIN_H)
+	titleLbl.Position          = UDim2.new(0, PILL_R*2 + s(6), 0, 0)
+	titleLbl.BackgroundTransparency = 1
+	titleLbl.Text              = self.title
+	titleLbl.TextColor3        = self:_theme().text
+	titleLbl.TextSize          = s(13)
+	titleLbl.Font              = Enum.Font.GothamBold
+	titleLbl.TextXAlignment    = Enum.TextXAlignment.Left
+	titleLbl.TextTruncate      = Enum.TextTruncate.AtEnd
+	titleLbl.Parent            = self.main
+
+	self._minBadge      = badge
+	self._minTitleLabel = titleLbl
+end
+
 function HorizonUI:_toggleMin()
 	if self._minAnim then return end
 	self.isMinimized = not self.isMinimized
 	if not self._origGeo then
 		self._origGeo = { Size = self.main.Size, Position = self.main.Position }
 	end
+
 	if self.isMinimized then
 		self._minAnim = true
-		local tw = TweenService:Create(self.main, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-			Size     = UDim2.new(0, s(260), 0, s(40)),
-			Position = UDim2.new(0.5, -s(130), 0, s(14)),
-		})
+		-- Önce badge'i oluştur ama gizli tut
+		self:_buildMinimizedBadge()
+		if self._minBadge      then self._minBadge.Visible      = false end
+		if self._minTitleLabel then self._minTitleLabel.Visible = false end
+
+		local tw = TweenService:Create(self.main,
+			TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+			{ Size=UDim2.new(0, MIN_W, 0, MIN_H), Position=UDim2.new(0.5, -MIN_W/2, 0, s(14)) })
 		tw:Play()
 		tw.Completed:Connect(function()
 			if self.sidebar     then self.sidebar.Visible     = false end
 			if self.contentArea then self.contentArea.Visible = false end
+			if self.titleBar    then self.titleBar.Visible    = false end
+			if self._minBadge      then self._minBadge.Visible      = true end
+			if self._minTitleLabel then self._minTitleLabel.Visible = true end
 			self._minAnim = false
 		end)
 	else
 		self._minAnim = true
+		-- Badge'leri kaldır
+		if self._minBadge      then self._minBadge:Destroy();      self._minBadge      = nil end
+		if self._minTitleLabel then self._minTitleLabel:Destroy(); self._minTitleLabel = nil end
+
 		if self.sidebar     then self.sidebar.Visible     = true end
 		if self.contentArea then self.contentArea.Visible = true end
-		local tw = TweenService:Create(self.main, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Size     = self._origGeo.Size,
-			Position = self._origGeo.Position,
-		})
+		if self.titleBar    then self.titleBar.Visible    = true end
+
+		local tw = TweenService:Create(self.main,
+			TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+			{ Size=self._origGeo.Size, Position=self._origGeo.Position })
 		tw:Play()
 		tw.Completed:Connect(function() self._minAnim = false end)
 	end
 end
 
+-- ─── Kapat Dialog ─────────────────────────────────────────────────────────────
 function HorizonUI:_closeDialog()
 	self.dialogOpen = true
 	local theme = self:_theme()
@@ -521,8 +555,8 @@ function HorizonUI:_closeDialog()
 
 	local dW, dH = s(300), s(130)
 	local dialog = Instance.new("Frame")
-	dialog.Size               = UDim2.new(0, 0, 0, 0)
-	dialog.Position           = UDim2.new(0.5, -dW/2, 0.5, -dH/2)
+	dialog.Size               = UDim2.new(0,0,0,0)
+	dialog.Position           = UDim2.new(0.5,-dW/2,0.5,-dH/2)
 	dialog.BackgroundColor3   = Color3.fromRGB(18,18,26)
 	dialog.BackgroundTransparency = 0.04
 	dialog.BorderSizePixel    = 0
@@ -533,8 +567,8 @@ function HorizonUI:_closeDialog()
 
 	local function makeLabel(text, yOff, sz, color, bold)
 		local lbl = Instance.new("TextLabel")
-		lbl.Size              = UDim2.new(1, -s(36), 0, s(24))
-		lbl.Position          = UDim2.new(0, s(18), 0, yOff)
+		lbl.Size              = UDim2.new(1,-s(36),0,s(24))
+		lbl.Position          = UDim2.new(0,s(18),0,yOff)
 		lbl.BackgroundTransparency = 1
 		lbl.Text              = text
 		lbl.TextColor3        = color or Color3.fromRGB(255,255,255)
@@ -551,8 +585,8 @@ function HorizonUI:_closeDialog()
 	local bW, bH = s(116), s(30)
 	local function makeBtn(xOff, text, bgColor, bgTrans)
 		local btn = Instance.new("TextButton")
-		btn.Size               = UDim2.new(0, bW, 0, bH)
-		btn.Position           = UDim2.new(0, xOff, 1, -s(40))
+		btn.Size               = UDim2.new(0,bW,0,bH)
+		btn.Position           = UDim2.new(0,xOff,1,-s(40))
 		btn.BackgroundColor3   = bgColor
 		btn.BackgroundTransparency = bgTrans
 		btn.BorderSizePixel    = 0
@@ -566,35 +600,35 @@ function HorizonUI:_closeDialog()
 		return btn
 	end
 
-	local cancelBtn  = makeBtn(s(18),         "Iptal", Color3.fromRGB(255,255,255), 0.88)
-	local confirmBtn = makeBtn(bW + s(24),    "Kapat", Color3.fromRGB(220,40,40),   0.18)
+	local cancelBtn  = makeBtn(s(18),      "İptal", Color3.fromRGB(255,255,255), 0.88)
+	local confirmBtn = makeBtn(bW+s(24),   "Kapat", Color3.fromRGB(220,40,40),   0.18)
 
-	cancelBtn.MouseButton1Click:Connect(function() overlay:Destroy(); self.dialogOpen = false end)
+	cancelBtn.MouseButton1Click:Connect(function()  overlay:Destroy(); self.dialogOpen = false end)
 	confirmBtn.MouseButton1Click:Connect(function() self:Destroy() end)
 	cancelBtn.MouseEnter:Connect(function()  Tween(cancelBtn,  {BackgroundTransparency=0.80}) end)
 	cancelBtn.MouseLeave:Connect(function()  Tween(cancelBtn,  {BackgroundTransparency=0.88}) end)
 	confirmBtn.MouseEnter:Connect(function() Tween(confirmBtn, {BackgroundTransparency=0.08}) end)
 	confirmBtn.MouseLeave:Connect(function() Tween(confirmBtn, {BackgroundTransparency=0.18}) end)
 
-	TweenService:Create(dialog, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-		Size = UDim2.new(0, dW, 0, dH)
-	}):Play()
+	TweenService:Create(dialog, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{Size=UDim2.new(0,dW,0,dH)}):Play()
 end
 
+-- ─── Tema Uygulama ────────────────────────────────────────────────────────────
 function HorizonUI:_applyTheme(idx)
 	local theme = Themes[idx] or Themes[1]
 	_state.themeIndex = idx
 
 	local function tw(obj, props) if obj and obj.Parent then Tween(obj, props, 0.3) end end
 
-	tw(self.main,           {BackgroundColor3 = theme.background})
-	tw(self.mainStroke,     {Color = theme.stroke})
-	tw(self.sidebar,        {BackgroundColor3 = theme.sidebar})
-	tw(self.sidebarStroke,  {Color = theme.stroke})
-	tw(self._userCardStroke,{Color = theme.stroke})
-	tw(self._statusLabel,   {TextColor3 = theme.subtext})
-	tw(self._titleLabel,    {TextColor3 = theme.text})
-	tw(self._logoLabel,     {TextColor3 = theme.text})
+	tw(self.main,            {BackgroundColor3=theme.background})
+	tw(self.mainStroke,      {Color=theme.stroke})
+	tw(self.sidebar,         {BackgroundColor3=theme.sidebar})
+	tw(self.sidebarStroke,   {Color=theme.stroke})
+	tw(self._userCardStroke, {Color=theme.stroke})
+	tw(self._statusLabel,    {TextColor3=theme.subtext})
+	tw(self._titleLabel,     {TextColor3=theme.text})
+	tw(self._logoLabel,      {TextColor3=theme.text})
 	if self._accentBarGrad then UpdateGradient(self._accentBarGrad, theme.accent1, theme.accent2) end
 
 	for _, tab in ipairs(self.tabs) do tab:_updateTheme(theme) end
@@ -603,22 +637,22 @@ function HorizonUI:_applyTheme(idx)
 		if reg.element and reg.element.Parent then
 			local k = reg.kind
 			if k == "accent_bg" then
-				tw(reg.element, {BackgroundColor3 = theme.accent1})
+				tw(reg.element, {BackgroundColor3=theme.accent1})
 				if reg.extra and reg.extra.grad then UpdateGradient(reg.extra.grad, theme.accent1, theme.accent2) end
 			elseif k == "accent_stroke" then
-				tw(reg.element, {Color = theme.accent1})
+				tw(reg.element, {Color=theme.accent1})
 			elseif k == "toggle_on" then
-				tw(reg.element, {BackgroundColor3 = theme.accent1})
+				tw(reg.element, {BackgroundColor3=theme.accent1})
 				if reg.extra and reg.extra.grad then UpdateGradient(reg.extra.grad, theme.accent1, theme.accent2) end
 			elseif k == "toggle_off" then
-				tw(reg.element, {BackgroundColor3 = theme.toggleOff})
+				tw(reg.element, {BackgroundColor3=theme.toggleOff})
 			elseif k == "track" then
-				tw(reg.element, {BackgroundColor3 = theme.trackBg})
+				tw(reg.element, {BackgroundColor3=theme.trackBg})
 			elseif k == "fill" then
-				tw(reg.element, {BackgroundColor3 = theme.accent1})
+				tw(reg.element, {BackgroundColor3=theme.accent1})
 				if reg.extra and reg.extra.grad then UpdateGradient(reg.extra.grad, theme.accent1, theme.accent2) end
 			elseif k == "element_bg" then
-				tw(reg.element, {BackgroundColor3 = theme.elementBg})
+				tw(reg.element, {BackgroundColor3=theme.elementBg})
 			end
 		end
 	end
@@ -634,6 +668,9 @@ function HorizonUI:Destroy()
 	self.gui:Destroy()
 end
 
+-- ════════════════════════════════════════════════════════════════════════════
+--  ELERIUM UYUMLU API — AddTab
+-- ════════════════════════════════════════════════════════════════════════════
 function HorizonUI:AddTab(name, icon)
 	local tab = Tab._new(self, name, icon or Icons.settings)
 	table.insert(self.tabs, tab)
@@ -644,6 +681,9 @@ function HorizonUI:AddTab(name, icon)
 	return tab
 end
 
+-- ════════════════════════════════════════════════════════════════════════════
+--  Tab
+-- ════════════════════════════════════════════════════════════════════════════
 function Tab._new(library, name, icon)
 	local self    = setmetatable({}, Tab)
 	self._lib     = library
@@ -762,12 +802,18 @@ function Tab:_updateTheme(theme)
 	for _, sec in ipairs(self.sections) do sec:_updateTheme(theme) end
 end
 
+-- ════════════════════════════════════════════════════════════════════════════
+--  ELERIUM UYUMLU API — AddSection
+-- ════════════════════════════════════════════════════════════════════════════
 function Tab:AddSection(name)
 	local sec = Section._new(self, name)
 	table.insert(self.sections, sec)
 	return sec
 end
 
+-- ════════════════════════════════════════════════════════════════════════════
+--  Section
+-- ════════════════════════════════════════════════════════════════════════════
 function Section._new(tab, name)
 	local self     = setmetatable({}, Section)
 	self._tab      = tab
@@ -780,7 +826,7 @@ end
 function Section:_build()
 	self.container = Instance.new("Frame")
 	self.container.Name              = self.name.."Sec"
-	self.container.Size              = UDim2.new(1, 0, 0, 0)
+	self.container.Size              = UDim2.new(1,0,0,0)
 	self.container.BackgroundTransparency = 1
 	self.container.Parent           = self._tab.content
 
@@ -788,7 +834,7 @@ function Section:_build()
 	if self.name ~= "" then
 		headerH = s(26)
 		local header = Instance.new("Frame")
-		header.Size               = UDim2.new(1, 0, 0, headerH)
+		header.Size               = UDim2.new(1,0,0,headerH)
 		header.BackgroundTransparency = 1
 		header.Parent             = self.container
 
@@ -801,12 +847,12 @@ function Section:_build()
 			ln.BorderSizePixel  = 0
 			ln.Parent           = header
 		end
-		makeLine(0, 0, 0.3, -s(6))
-		makeLine(0.7, s(6), 0.3, -s(6))
+		makeLine(0,0,0.3,-s(6))
+		makeLine(0.7,s(6),0.3,-s(6))
 
 		local hTitle = Instance.new("TextLabel")
-		hTitle.Size              = UDim2.new(0.4, 0, 1, 0)
-		hTitle.Position          = UDim2.new(0.3, 0, 0, 0)
+		hTitle.Size              = UDim2.new(0.4,0,1,0)
+		hTitle.Position          = UDim2.new(0.3,0,0,0)
 		hTitle.BackgroundTransparency = 1
 		hTitle.Text              = self.name
 		hTitle.TextColor3        = Color3.fromRGB(200,200,215)
@@ -817,8 +863,8 @@ function Section:_build()
 
 	self._elems = Instance.new("Frame")
 	self._elems.Name              = "Elems"
-	self._elems.Size              = UDim2.new(1, 0, 0, 0)
-	self._elems.Position          = UDim2.new(0, 0, 0, headerH)
+	self._elems.Size              = UDim2.new(1,0,0,0)
+	self._elems.Position          = UDim2.new(0,0,0,headerH)
 	self._elems.BackgroundTransparency = 1
 	self._elems.Parent           = self.container
 
@@ -828,8 +874,8 @@ function Section:_build()
 	layout.Parent    = self._elems
 
 	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		self._elems.Size    = UDim2.new(1, 0, 0, layout.AbsoluteContentSize.Y)
-		self.container.Size = UDim2.new(1, 0, 0, headerH + layout.AbsoluteContentSize.Y)
+		self._elems.Size    = UDim2.new(1,0,0,layout.AbsoluteContentSize.Y)
+		self.container.Size = UDim2.new(1,0,0,headerH + layout.AbsoluteContentSize.Y)
 	end)
 	self._headerH = headerH
 end
@@ -842,12 +888,17 @@ end
 
 function Section:_lib() return self._tab._lib end
 
+-- ════════════════════════════════════════════════════════════════════════════
+--  Elerium uyumlu elementler
+-- ════════════════════════════════════════════════════════════════════════════
+
+-- AddToggle ─────────────────────────────────────────────────────────────────
 function Section:AddToggle(name, default, callback)
 	local lib   = self:_lib()
 	local theme = lib:_theme()
 
 	local frame = Instance.new("Frame")
-	frame.Size               = UDim2.new(1, 0, 0, s(44))
+	frame.Size               = UDim2.new(1,0,0,s(44))
 	frame.BackgroundColor3   = Color3.fromRGB(255,255,255)
 	frame.BackgroundTransparency = 0.94
 	frame.BorderSizePixel    = 0
@@ -855,8 +906,8 @@ function Section:AddToggle(name, default, callback)
 	MakeCorner(frame, s(10))
 
 	local lbl = Instance.new("TextLabel")
-	lbl.Size              = UDim2.new(1, -s(80), 1, 0)
-	lbl.Position          = UDim2.new(0, s(12), 0, 0)
+	lbl.Size              = UDim2.new(1,-s(80),1,0)
+	lbl.Position          = UDim2.new(0,s(12),0,0)
 	lbl.BackgroundTransparency = 1
 	lbl.Text              = name
 	lbl.TextColor3        = theme.text
@@ -869,8 +920,8 @@ function Section:AddToggle(name, default, callback)
 	local tW, tH = s(42), s(20)
 
 	local toggle = Instance.new("TextButton")
-	toggle.Size               = UDim2.new(0, tW, 0, tH)
-	toggle.Position           = UDim2.new(1, -(tW+s(12)), 0.5, -tH/2)
+	toggle.Size               = UDim2.new(0,tW,0,tH)
+	toggle.Position           = UDim2.new(1,-(tW+s(12)),0.5,-tH/2)
 	toggle.BackgroundColor3   = active and theme.accent1 or theme.toggleOff
 	toggle.BackgroundTransparency = active and 0.15 or 0.4
 	toggle.BorderSizePixel    = 0
@@ -880,8 +931,8 @@ function Section:AddToggle(name, default, callback)
 
 	local thumbSz = s(14)
 	local thumb = Instance.new("Frame")
-	thumb.Size             = UDim2.new(0, thumbSz, 0, thumbSz)
-	thumb.Position         = active and UDim2.new(0, tW-thumbSz-s(3), 0, s(3)) or UDim2.new(0, s(3), 0, s(3))
+	thumb.Size             = UDim2.new(0,thumbSz,0,thumbSz)
+	thumb.Position         = active and UDim2.new(0,tW-thumbSz-s(3),0,s(3)) or UDim2.new(0,s(3),0,s(3))
 	thumb.BackgroundColor3 = Color3.fromRGB(255,255,255)
 	thumb.BorderSizePixel  = 0
 	thumb.Parent           = toggle
@@ -896,13 +947,9 @@ function Section:AddToggle(name, default, callback)
 		local t = lib:_theme()
 		if active then
 			Tween(toggle, {BackgroundColor3=t.accent1, BackgroundTransparency=0.15})
-			local existing = toggle:FindFirstChildOfClass("UIGradient")
-			if not existing then
-				grad = MakeGradient(toggle, t.accent1, t.accent2)
-			else
-				UpdateGradient(existing, t.accent1, t.accent2)
-				grad = existing
-			end
+			local ex = toggle:FindFirstChildOfClass("UIGradient")
+			if not ex then grad = MakeGradient(toggle, t.accent1, t.accent2)
+			else UpdateGradient(ex, t.accent1, t.accent2); grad = ex end
 			lib:_regTheme(toggle, "toggle_on", {grad=grad})
 		else
 			Tween(toggle, {BackgroundColor3=t.toggleOff, BackgroundTransparency=0.4})
@@ -912,7 +959,7 @@ function Section:AddToggle(name, default, callback)
 			lib:_regTheme(toggle, "toggle_off", nil)
 		end
 		TweenService:Create(thumb, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Position = active and UDim2.new(0, tW-thumbSz-s(3), 0, s(3)) or UDim2.new(0, s(3), 0, s(3))
+			Position = active and UDim2.new(0,tW-thumbSz-s(3),0,s(3)) or UDim2.new(0,s(3),0,s(3))
 		}):Play()
 		if callback then callback(active) end
 	end)
@@ -921,12 +968,13 @@ function Section:AddToggle(name, default, callback)
 	return { getValue = function() return active end }
 end
 
+-- AddSlider ─────────────────────────────────────────────────────────────────
 function Section:AddSlider(name, min, max, default, callback)
 	local lib   = self:_lib()
 	local theme = lib:_theme()
 
 	local frame = Instance.new("Frame")
-	frame.Size               = UDim2.new(1, 0, 0, s(56))
+	frame.Size               = UDim2.new(1,0,0,s(56))
 	frame.BackgroundColor3   = Color3.fromRGB(255,255,255)
 	frame.BackgroundTransparency = 0.94
 	frame.BorderSizePixel    = 0
@@ -934,8 +982,8 @@ function Section:AddSlider(name, min, max, default, callback)
 	MakeCorner(frame, s(10))
 
 	local lbl = Instance.new("TextLabel")
-	lbl.Size              = UDim2.new(1, -s(70), 0, s(18))
-	lbl.Position          = UDim2.new(0, s(12), 0, s(7))
+	lbl.Size              = UDim2.new(1,-s(70),0,s(18))
+	lbl.Position          = UDim2.new(0,s(12),0,s(7))
 	lbl.BackgroundTransparency = 1
 	lbl.Text              = name
 	lbl.TextColor3        = theme.text
@@ -947,8 +995,8 @@ function Section:AddSlider(name, min, max, default, callback)
 	local currentValue = clamp(default or min, min, max)
 
 	local valLbl = Instance.new("TextLabel")
-	valLbl.Size              = UDim2.new(0, s(50), 0, s(18))
-	valLbl.Position          = UDim2.new(1, -s(60), 0, s(7))
+	valLbl.Size              = UDim2.new(0,s(50),0,s(18))
+	valLbl.Position          = UDim2.new(1,-s(60),0,s(7))
 	valLbl.BackgroundTransparency = 1
 	valLbl.Text              = tostring(currentValue)
 	valLbl.TextColor3        = theme.subtext
@@ -958,8 +1006,8 @@ function Section:AddSlider(name, min, max, default, callback)
 	valLbl.Parent            = frame
 
 	local track = Instance.new("Frame")
-	track.Size             = UDim2.new(1, -s(28), 0, s(5))
-	track.Position         = UDim2.new(0, s(14), 0, s(38))
+	track.Size             = UDim2.new(1,-s(28),0,s(5))
+	track.Position         = UDim2.new(0,s(14),0,s(38))
 	track.BackgroundColor3 = theme.trackBg
 	track.BackgroundTransparency = 0.25
 	track.BorderSizePixel  = 0
@@ -968,9 +1016,8 @@ function Section:AddSlider(name, min, max, default, callback)
 	lib:_regTheme(track, "track", nil)
 
 	local progress = (currentValue - min) / (max - min)
-
 	local fill = Instance.new("Frame")
-	fill.Size             = UDim2.new(progress, 0, 1, 0)
+	fill.Size             = UDim2.new(progress,0,1,0)
 	fill.BackgroundColor3 = theme.accent1
 	fill.BorderSizePixel  = 0
 	fill.Parent           = track
@@ -979,8 +1026,8 @@ function Section:AddSlider(name, min, max, default, callback)
 	lib:_regTheme(fill, "fill", {grad=fillGrad})
 
 	local thumb = Instance.new("Frame")
-	thumb.Size             = UDim2.new(0, s(18), 0, s(18))
-	thumb.Position         = UDim2.new(progress, -s(9), 0.5, -s(9))
+	thumb.Size             = UDim2.new(0,s(18),0,s(18))
+	thumb.Position         = UDim2.new(progress,-s(9),0.5,-s(9))
 	thumb.BackgroundColor3 = Color3.fromRGB(255,255,255)
 	thumb.BorderSizePixel  = 0
 	thumb.ZIndex           = 2
@@ -992,7 +1039,7 @@ function Section:AddSlider(name, min, max, default, callback)
 	local isDragging = false
 	local function updateSlider(input)
 		local rel = clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-		currentValue = math.floor(min + rel * (max - min))
+		currentValue = math.floor(min + rel*(max-min))
 		Tween(fill,  {Size=UDim2.new(rel,0,1,0)}, 0.08)
 		Tween(thumb, {Position=UDim2.new(rel,-s(9),0.5,-s(9))}, 0.08)
 		valLbl.Text = tostring(currentValue)
@@ -1001,8 +1048,7 @@ function Section:AddSlider(name, min, max, default, callback)
 
 	track.InputBegan:Connect(function(inp)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-			isDragging = true
-			lib._sliderDrag = true
+			isDragging = true; lib._sliderDrag = true
 			updateSlider(inp)
 			Tween(thumb, {Size=UDim2.new(0,s(22),0,s(22))}, 0.1)
 		end
@@ -1014,8 +1060,7 @@ function Section:AddSlider(name, min, max, default, callback)
 	end)
 	UserInputService.InputEnded:Connect(function(inp)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 and isDragging then
-			isDragging = false
-			lib._sliderDrag = false
+			isDragging = false; lib._sliderDrag = false
 			Tween(thumb, {Size=UDim2.new(0,s(18),0,s(18))}, 0.18)
 		end
 	end)
@@ -1024,13 +1069,14 @@ function Section:AddSlider(name, min, max, default, callback)
 	return { getValue = function() return currentValue end }
 end
 
+-- AddDropdown ───────────────────────────────────────────────────────────────
 function Section:AddDropdown(name, options, default, callback)
 	local lib   = self:_lib()
 	local theme = lib:_theme()
 	local baseH = s(70)
 
 	local frame = Instance.new("Frame")
-	frame.Size               = UDim2.new(1, 0, 0, baseH)
+	frame.Size               = UDim2.new(1,0,0,baseH)
 	frame.BackgroundColor3   = Color3.fromRGB(255,255,255)
 	frame.BackgroundTransparency = 0.94
 	frame.BorderSizePixel    = 0
@@ -1038,8 +1084,8 @@ function Section:AddDropdown(name, options, default, callback)
 	MakeCorner(frame, s(10))
 
 	local lbl = Instance.new("TextLabel")
-	lbl.Size              = UDim2.new(1, -s(24), 0, s(18))
-	lbl.Position          = UDim2.new(0, s(12), 0, s(8))
+	lbl.Size              = UDim2.new(1,-s(24),0,s(18))
+	lbl.Position          = UDim2.new(0,s(12),0,s(8))
 	lbl.BackgroundTransparency = 1
 	lbl.Text              = name
 	lbl.TextColor3        = theme.text
@@ -1051,8 +1097,8 @@ function Section:AddDropdown(name, options, default, callback)
 	local currentValue = default or options[1]
 
 	local dropBtn = Instance.new("TextButton")
-	dropBtn.Size               = UDim2.new(1, -s(24), 0, s(32))
-	dropBtn.Position           = UDim2.new(0, s(12), 0, s(30))
+	dropBtn.Size               = UDim2.new(1,-s(24),0,s(32))
+	dropBtn.Position           = UDim2.new(0,s(12),0,s(30))
 	dropBtn.BackgroundColor3   = theme.elementBg
 	dropBtn.BackgroundTransparency = 0.25
 	dropBtn.BorderSizePixel    = 0
@@ -1064,8 +1110,8 @@ function Section:AddDropdown(name, options, default, callback)
 	lib:_regTheme(dropBtn, "element_bg", nil)
 
 	local dropText = Instance.new("TextLabel")
-	dropText.Size              = UDim2.new(1, -s(36), 1, 0)
-	dropText.Position          = UDim2.new(0, s(10), 0, 0)
+	dropText.Size              = UDim2.new(1,-s(36),1,0)
+	dropText.Position          = UDim2.new(0,s(10),0,0)
 	dropText.BackgroundTransparency = 1
 	dropText.Text              = currentValue
 	dropText.TextColor3        = theme.text
@@ -1075,8 +1121,8 @@ function Section:AddDropdown(name, options, default, callback)
 	dropText.Parent            = dropBtn
 
 	local arrow = Instance.new("TextLabel")
-	arrow.Size              = UDim2.new(0, s(20), 1, 0)
-	arrow.Position          = UDim2.new(1, -s(26), 0, 0)
+	arrow.Size              = UDim2.new(0,s(20),1,0)
+	arrow.Position          = UDim2.new(1,-s(26),0,0)
 	arrow.BackgroundTransparency = 1
 	arrow.Text              = "▾"
 	arrow.TextColor3        = theme.subtext
@@ -1085,8 +1131,8 @@ function Section:AddDropdown(name, options, default, callback)
 	arrow.Parent            = dropBtn
 
 	local listFrame = Instance.new("Frame")
-	listFrame.Size               = UDim2.new(1, 0, 0, 0)
-	listFrame.Position           = UDim2.new(0, 0, 0, s(34))
+	listFrame.Size               = UDim2.new(1,0,0,0)
+	listFrame.Position           = UDim2.new(0,0,0,s(34))
 	listFrame.BackgroundColor3   = Color3.fromRGB(20,20,32)
 	listFrame.BackgroundTransparency = 0.04
 	listFrame.BorderSizePixel    = 0
@@ -1099,8 +1145,8 @@ function Section:AddDropdown(name, options, default, callback)
 	local expandedH = #options * s(32)
 	for i, opt in ipairs(options) do
 		local optBtn = Instance.new("TextButton")
-		optBtn.Size               = UDim2.new(1, -s(10), 0, s(28))
-		optBtn.Position           = UDim2.new(0, s(5), 0, (i-1)*s(32)+s(2))
+		optBtn.Size               = UDim2.new(1,-s(10),0,s(28))
+		optBtn.Position           = UDim2.new(0,s(5),0,(i-1)*s(32)+s(2))
 		optBtn.BackgroundColor3   = Color3.fromRGB(255,255,255)
 		optBtn.BackgroundTransparency = 1
 		optBtn.BorderSizePixel    = 0
@@ -1116,8 +1162,8 @@ function Section:AddDropdown(name, options, default, callback)
 		pad.PaddingLeft = UDim.new(0, s(8))
 		pad.Parent = optBtn
 
-		optBtn.MouseEnter:Connect(function() Tween(optBtn, {BackgroundTransparency=0.88}) end)
-		optBtn.MouseLeave:Connect(function() Tween(optBtn, {BackgroundTransparency=1}) end)
+		optBtn.MouseEnter:Connect(function()  Tween(optBtn, {BackgroundTransparency=0.88}) end)
+		optBtn.MouseLeave:Connect(function()  Tween(optBtn, {BackgroundTransparency=1}) end)
 		optBtn.MouseButton1Click:Connect(function()
 			currentValue = opt
 			dropText.Text = opt
@@ -1147,12 +1193,13 @@ function Section:AddDropdown(name, options, default, callback)
 	return { getValue = function() return currentValue end }
 end
 
+-- AddButton ─────────────────────────────────────────────────────────────────
 function Section:AddButton(name, callback)
 	local lib   = self:_lib()
 	local theme = lib:_theme()
 
 	local frame = Instance.new("Frame")
-	frame.Size               = UDim2.new(1, 0, 0, s(44))
+	frame.Size               = UDim2.new(1,0,0,s(44))
 	frame.BackgroundColor3   = Color3.fromRGB(255,255,255)
 	frame.BackgroundTransparency = 0.94
 	frame.BorderSizePixel    = 0
@@ -1160,8 +1207,8 @@ function Section:AddButton(name, callback)
 	MakeCorner(frame, s(10))
 
 	local btn = Instance.new("TextButton")
-	btn.Size               = UDim2.new(1, -s(24), 1, -s(10))
-	btn.Position           = UDim2.new(0, s(12), 0, s(5))
+	btn.Size               = UDim2.new(1,-s(24),1,-s(10))
+	btn.Position           = UDim2.new(0,s(12),0,s(5))
 	btn.BackgroundColor3   = theme.accent1
 	btn.BackgroundTransparency = 0.25
 	btn.BorderSizePixel    = 0
@@ -1180,23 +1227,24 @@ function Section:AddButton(name, callback)
 		Tween(btn, {Size=UDim2.new(1,-s(24),1,-s(10))}, 0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 		if callback then callback() end
 	end)
-	btn.MouseEnter:Connect(function() Tween(btn, {BackgroundTransparency=0.12}) end)
+	btn.MouseEnter:Connect(function()  Tween(btn, {BackgroundTransparency=0.12}) end)
 	btn.MouseLeave:Connect(function() Tween(btn, {BackgroundTransparency=0.25}) end)
 end
 
+-- AddLabel ──────────────────────────────────────────────────────────────────
 function Section:AddLabel(text)
 	local lib   = self:_lib()
 	local theme = lib:_theme()
 
 	local frame = Instance.new("Frame")
-	frame.Size               = UDim2.new(1, 0, 0, s(34))
+	frame.Size               = UDim2.new(1,0,0,s(34))
 	frame.BackgroundTransparency = 1
 	frame.BorderSizePixel    = 0
 	frame.Parent             = self._elems
 
 	local lbl = Instance.new("TextLabel")
-	lbl.Size              = UDim2.new(1, -s(24), 1, 0)
-	lbl.Position          = UDim2.new(0, s(12), 0, 0)
+	lbl.Size              = UDim2.new(1,-s(24),1,0)
+	lbl.Position          = UDim2.new(0,s(12),0,0)
 	lbl.BackgroundTransparency = 1
 	lbl.Text              = text or "Label"
 	lbl.TextColor3        = theme.subtext
@@ -1213,12 +1261,13 @@ function Section:AddLabel(text)
 	}
 end
 
+-- AddInput ──────────────────────────────────────────────────────────────────
 function Section:AddInput(name, placeholder, callback)
 	local lib   = self:_lib()
 	local theme = lib:_theme()
 
 	local frame = Instance.new("Frame")
-	frame.Size               = UDim2.new(1, 0, 0, s(70))
+	frame.Size               = UDim2.new(1,0,0,s(70))
 	frame.BackgroundColor3   = Color3.fromRGB(255,255,255)
 	frame.BackgroundTransparency = 0.94
 	frame.BorderSizePixel    = 0
@@ -1226,8 +1275,8 @@ function Section:AddInput(name, placeholder, callback)
 	MakeCorner(frame, s(10))
 
 	local lbl = Instance.new("TextLabel")
-	lbl.Size              = UDim2.new(1, -s(24), 0, s(18))
-	lbl.Position          = UDim2.new(0, s(12), 0, s(8))
+	lbl.Size              = UDim2.new(1,-s(24),0,s(18))
+	lbl.Position          = UDim2.new(0,s(12),0,s(8))
 	lbl.BackgroundTransparency = 1
 	lbl.Text              = name
 	lbl.TextColor3        = theme.text
@@ -1237,8 +1286,8 @@ function Section:AddInput(name, placeholder, callback)
 	lbl.Parent            = frame
 
 	local box = Instance.new("TextBox")
-	box.Size               = UDim2.new(1, -s(24), 0, s(32))
-	box.Position           = UDim2.new(0, s(12), 0, s(30))
+	box.Size               = UDim2.new(1,-s(24),0,s(32))
+	box.Position           = UDim2.new(0,s(12),0,s(30))
 	box.BackgroundColor3   = theme.elementBg
 	box.BackgroundTransparency = 0.25
 	box.BorderSizePixel    = 0
@@ -1274,12 +1323,13 @@ function Section:AddInput(name, placeholder, callback)
 	}
 end
 
+-- AddColorPicker ────────────────────────────────────────────────────────────
 function Section:AddColorPicker(name, callback)
 	local lib   = self:_lib()
 	local theme = lib:_theme()
 
 	local frame = Instance.new("Frame")
-	frame.Size               = UDim2.new(1, 0, 0, s(64))
+	frame.Size               = UDim2.new(1,0,0,s(64))
 	frame.BackgroundColor3   = Color3.fromRGB(255,255,255)
 	frame.BackgroundTransparency = 0.94
 	frame.BorderSizePixel    = 0
@@ -1287,8 +1337,8 @@ function Section:AddColorPicker(name, callback)
 	MakeCorner(frame, s(10))
 
 	local lbl = Instance.new("TextLabel")
-	lbl.Size              = UDim2.new(1, -s(24), 0, s(18))
-	lbl.Position          = UDim2.new(0, s(12), 0, s(8))
+	lbl.Size              = UDim2.new(1,-s(24),0,s(18))
+	lbl.Position          = UDim2.new(0,s(12),0,s(8))
 	lbl.BackgroundTransparency = 1
 	lbl.Text              = name
 	lbl.TextColor3        = theme.text
@@ -1298,8 +1348,8 @@ function Section:AddColorPicker(name, callback)
 	lbl.Parent            = frame
 
 	local row = Instance.new("Frame")
-	row.Size               = UDim2.new(1, -s(24), 0, s(28))
-	row.Position           = UDim2.new(0, s(12), 0, s(30))
+	row.Size               = UDim2.new(1,-s(24),0,s(28))
+	row.Position           = UDim2.new(0,s(12),0,s(30))
 	row.BackgroundTransparency = 1
 	row.Parent             = frame
 	local layout = Instance.new("UIListLayout")
@@ -1311,7 +1361,7 @@ function Section:AddColorPicker(name, callback)
 	for i = 1, #Themes do
 		local t = Themes[i]
 		local cb = Instance.new("TextButton")
-		cb.Size             = UDim2.new(0, s(28), 0, s(28))
+		cb.Size             = UDim2.new(0,s(28),0,s(28))
 		cb.BackgroundColor3 = t.accent1
 		cb.BorderSizePixel  = 0
 		cb.Text             = ""
@@ -1322,9 +1372,9 @@ function Section:AddColorPicker(name, callback)
 
 		cb.MouseButton1Click:Connect(function()
 			selectedIdx = i
-			for _, c in pairs(row:GetChildren()) do
-				if c:IsA("TextButton") then
-					local st = c:FindFirstChildOfClass("UIStroke")
+			for _, c2 in pairs(row:GetChildren()) do
+				if c2:IsA("TextButton") then
+					local st = c2:FindFirstChildOfClass("UIStroke")
 					if st then Tween(st, {Transparency=1}) end
 				end
 			end
@@ -1338,12 +1388,13 @@ function Section:AddColorPicker(name, callback)
 	end
 end
 
+-- AddKeybind ────────────────────────────────────────────────────────────────
 function Section:AddKeybind(name, defaultKey, callback)
 	local lib   = self:_lib()
 	local theme = lib:_theme()
 
 	local frame = Instance.new("Frame")
-	frame.Size               = UDim2.new(1, 0, 0, s(48))
+	frame.Size               = UDim2.new(1,0,0,s(48))
 	frame.BackgroundColor3   = Color3.fromRGB(255,255,255)
 	frame.BackgroundTransparency = 0.94
 	frame.BorderSizePixel    = 0
@@ -1351,8 +1402,8 @@ function Section:AddKeybind(name, defaultKey, callback)
 	MakeCorner(frame, s(10))
 
 	local lbl = Instance.new("TextLabel")
-	lbl.Size              = UDim2.new(1, -s(120), 1, 0)
-	lbl.Position          = UDim2.new(0, s(12), 0, 0)
+	lbl.Size              = UDim2.new(1,-s(120),1,0)
+	lbl.Position          = UDim2.new(0,s(12),0,0)
 	lbl.BackgroundTransparency = 1
 	lbl.Text              = name
 	lbl.TextColor3        = theme.text
@@ -1364,8 +1415,8 @@ function Section:AddKeybind(name, defaultKey, callback)
 	local currentKey = defaultKey or Enum.KeyCode.F
 
 	local keyBtn = Instance.new("TextButton")
-	keyBtn.Size               = UDim2.new(0, s(88), 0, s(30))
-	keyBtn.Position           = UDim2.new(1, -s(102), 0.5, -s(15))
+	keyBtn.Size               = UDim2.new(0,s(88),0,s(30))
+	keyBtn.Position           = UDim2.new(1,-s(102),0.5,-s(15))
 	keyBtn.BackgroundColor3   = Color3.fromRGB(35,35,50)
 	keyBtn.BackgroundTransparency = 0.25
 	keyBtn.BorderSizePixel    = 0
@@ -1404,4 +1455,140 @@ function Section:AddKeybind(name, defaultKey, callback)
 	}
 end
 
-return HorizonUI
+-- ════════════════════════════════════════════════════════════════════════════
+--  ELERIUM UYUMLU — AddFolder (Section içinde bölüm gruplandırma)
+--  Kullanım: local folder = section:AddFolder("Grup Adı")
+--            folder:AddToggle(...)
+-- ════════════════════════════════════════════════════════════════════════════
+function Section:AddFolder(name)
+	local lib   = self:_lib()
+	local theme = lib:_theme()
+
+	-- Wrapper frame
+	local wrapper = Instance.new("Frame")
+	wrapper.Size               = UDim2.new(1,0,0,s(34))
+	wrapper.BackgroundColor3   = Color3.fromRGB(255,255,255)
+	wrapper.BackgroundTransparency = 0.96
+	wrapper.BorderSizePixel    = 0
+	wrapper.Parent             = self._elems
+	wrapper.ClipsDescendants   = false
+	MakeCorner(wrapper, s(10))
+	MakeStroke(wrapper, theme.stroke, 0.7, 1)
+
+	-- Başlık butonu
+	local headerBtn = Instance.new("TextButton")
+	headerBtn.Size               = UDim2.new(1,0,0,s(34))
+	headerBtn.BackgroundTransparency = 1
+	headerBtn.BorderSizePixel    = 0
+	headerBtn.Text               = ""
+	headerBtn.Parent             = wrapper
+
+	local arrowLbl = Instance.new("TextLabel")
+	arrowLbl.Size              = UDim2.new(0,s(20),0,s(34))
+	arrowLbl.Position          = UDim2.new(0,s(8),0,0)
+	arrowLbl.BackgroundTransparency = 1
+	arrowLbl.Text              = "▸"
+	arrowLbl.TextColor3        = theme.subtext
+	arrowLbl.TextSize          = s(11)
+	arrowLbl.Font              = Enum.Font.GothamBold
+	arrowLbl.Parent            = wrapper
+
+	local nameLbl = Instance.new("TextLabel")
+	nameLbl.Size              = UDim2.new(1,-s(30),0,s(34))
+	nameLbl.Position          = UDim2.new(0,s(26),0,0)
+	nameLbl.BackgroundTransparency = 1
+	nameLbl.Text              = name
+	nameLbl.TextColor3        = theme.text
+	nameLbl.TextSize          = s(12)
+	nameLbl.Font              = Enum.Font.GothamBold
+	nameLbl.TextXAlignment    = Enum.TextXAlignment.Left
+	nameLbl.Parent            = wrapper
+
+	-- İçerik çerçevesi
+	local inner = Instance.new("Frame")
+	inner.Size               = UDim2.new(1,-s(8),0,0)
+	inner.Position           = UDim2.new(0,s(4),0,s(34))
+	inner.BackgroundTransparency = 1
+	inner.BorderSizePixel    = 0
+	inner.Visible            = false
+	inner.Parent             = wrapper
+
+	local innerLayout = Instance.new("UIListLayout")
+	innerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	innerLayout.Padding   = UDim.new(0, s(5))
+	innerLayout.Parent    = inner
+
+	-- Yükseklik güncelleme
+	local function refreshHeight()
+		local innerH = inner.Visible and (innerLayout.AbsoluteContentSize.Y + s(8)) or 0
+		wrapper.Size = UDim2.new(1,0,0,s(34) + innerH)
+		inner.Size   = UDim2.new(1,-s(8),0,innerLayout.AbsoluteContentSize.Y + s(4))
+	end
+
+	innerLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(refreshHeight)
+
+	local isOpen = false
+	headerBtn.MouseButton1Click:Connect(function()
+		isOpen = not isOpen
+		inner.Visible = isOpen
+		Tween(arrowLbl, {Rotation = isOpen and 90 or 0})
+		refreshHeight()
+	end)
+
+	-- Folder, Section ile aynı element metodlarını sunar
+	-- ama parent olarak inner frame'i kullanır
+	local folderSection = setmetatable({}, Section)
+	folderSection._tab      = self._tab
+	folderSection.name      = name
+	folderSection._elements = {}
+	folderSection._headerH  = 0
+
+	-- _elems'i inner frame'e yönlendir
+	folderSection._elems = inner
+
+	-- _build'ı atla, zaten oluşturduk
+	-- Metodları miras alıyoruz; sadece _lib'i düzelt
+	function folderSection:_lib() return self._tab._lib end
+
+	return folderSection
+end
+
+-- ════════════════════════════════════════════════════════════════════════════
+--  KÜTÜPHANE DIŞA AKTARIMI
+--  Hem doğrudan (HorizonUI.new) hem de Elerium tarzı (HorizonUI:AddWindow)
+--  ile kullanılabilir.
+-- ════════════════════════════════════════════════════════════════════════════
+local Library = {}
+Library.__index = Library
+
+function Library:AddWindow(title, opts)
+	return HorizonUI.new(title)
+end
+
+-- Kullanım Örneği:
+--[[
+	local Horizon = loadstring(game:HttpGet("..."))()   -- veya require()
+
+	-- Elerium tarzı:
+	local Window  = Horizon:AddWindow("Benim UI")
+	local Tab1    = Window:AddTab("Ana Sayfa", rbxassetid://...)
+	local Sec1    = Tab1:AddSection("Ayarlar")
+	Sec1:AddToggle("Uçuş", false, function(v) print(v) end)
+	Sec1:AddSlider("Hız", 0, 100, 50, function(v) print(v) end)
+	Sec1:AddDropdown("Mod", {"Normal","Turbo"}, "Normal", function(v) print(v) end)
+	Sec1:AddButton("Uygula", function() print("Tıklandı") end)
+	local folder = Sec1:AddFolder("Gelişmiş")
+	folder:AddToggle("Debug", false, print)
+
+	-- Doğrudan tarz:
+	local Window2 = HorizonUI.new("Diğer UI")
+--]]
+
+return setmetatable(Library, {
+	__call = function(_, title)
+		return HorizonUI.new(title)
+	end,
+	__index = {
+		new = HorizonUI.new,
+	}
+})
