@@ -1,4 +1,4 @@
--- HORIZON UI v1.0
+-- HORIZON UI v1.1
 -- Kullanim:
 --   local Horizon = loadstring(game:HttpGet("RAW_URL"))()
 --   local win = Horizon.new("Script Adi")
@@ -97,6 +97,13 @@ local Themes = {
 		toggleOff  = Color3.fromRGB(68,  40,  80),
 		trackBg    = Color3.fromRGB(60,  35,  72),
 	},
+}
+
+-- macOS / VS Code tarzı pencere nokta renkleri
+local WIN_DOTS = {
+	Color3.fromRGB(255,  95,  87),  -- kırmızı
+	Color3.fromRGB(255, 189,  46),  -- sarı
+	Color3.fromRGB(40,  200,  64),  -- yeşil
 }
 
 local Icons = {
@@ -234,6 +241,59 @@ end
 function HorizonUI:_buildControls()
 	local theme = self:_theme()
 
+	-- ── VS Code / macOS pencere noktaları (sol taraf, sidebar içinde) ──
+	local dotSpacing = s(18)
+	local dotSize    = s(11)
+	local dotStartX  = s(14)
+
+	for i, dotColor in ipairs(WIN_DOTS) do
+		local dot = Instance.new("Frame")
+		dot.Size             = UDim2.new(0, dotSize, 0, dotSize)
+		dot.Position         = UDim2.new(0, dotStartX + (i-1)*dotSpacing, 0.5, -dotSize/2)
+		dot.BackgroundColor3 = dotColor
+		dot.BorderSizePixel  = 0
+		dot.Parent           = self.titleBar
+		MakeCorner(dot, dotSize)
+
+		-- İnce parlak kenarlık (glow efekti)
+		local glow = Instance.new("UIStroke")
+		glow.Color        = dotColor
+		glow.Transparency = 0.55
+		glow.Thickness    = 1.5
+		glow.Parent       = dot
+
+		-- Hover animasyonu: hafif parlama
+		local btn = Instance.new("TextButton")
+		btn.Size               = UDim2.new(1,0,1,0)
+		btn.BackgroundTransparency = 1
+		btn.Text               = ""
+		btn.Parent             = dot
+		btn.MouseEnter:Connect(function()
+			Tween(dot, {BackgroundColor3 = Color3.fromRGB(
+				math.min(dotColor.R*255+40,255),
+				math.min(dotColor.G*255+40,255),
+				math.min(dotColor.B*255+40,255)
+			)}, 0.15)
+			Tween(glow, {Transparency=0.1}, 0.15)
+		end)
+		btn.MouseLeave:Connect(function()
+			Tween(dot, {BackgroundColor3=dotColor}, 0.2)
+			Tween(glow, {Transparency=0.55}, 0.2)
+		end)
+
+		-- İşlevsellik: 1=kapat, 2=minimize, 3=hiçbir şey
+		if i == 1 then
+			btn.MouseButton1Click:Connect(function()
+				if not self.dialogOpen then self:_closeDialog() end
+			end)
+		elseif i == 2 then
+			btn.MouseButton1Click:Connect(function()
+				if not self.dialogOpen then self:_toggleMin() end
+			end)
+		end
+	end
+
+	-- ── Sağ taraftaki başlık etiketi ──
 	local titleLabel = Instance.new("TextLabel")
 	titleLabel.Size               = UDim2.new(1, -s(120), 1, 0)
 	titleLabel.Position           = UDim2.new(0, SIDEBAR_W + s(14), 0, 0)
@@ -245,38 +305,6 @@ function HorizonUI:_buildControls()
 	titleLabel.TextXAlignment     = Enum.TextXAlignment.Left
 	titleLabel.Parent             = self.titleBar
 	self._titleLabel = titleLabel
-
-	local ctrlFrame = Instance.new("Frame")
-	ctrlFrame.Size               = UDim2.new(0, s(80), 1, 0)
-	ctrlFrame.Position           = UDim2.new(1, -s(92), 0, 0)
-	ctrlFrame.BackgroundTransparency = 1
-	ctrlFrame.Parent             = self.titleBar
-
-	local function makeBtn(xOff, iconAsset, iconColor)
-		local btn = Instance.new("TextButton")
-		btn.Size                = UDim2.new(0, s(30), 0, s(30))
-		btn.Position            = UDim2.new(0, xOff, 0.5, -s(15))
-		btn.BackgroundColor3    = Color3.fromRGB(255,255,255)
-		btn.BackgroundTransparency = 0.92
-		btn.BorderSizePixel     = 0
-		btn.Text                = ""
-		btn.Parent              = ctrlFrame
-		MakeCorner(btn, s(8))
-		MakeIcon(btn, iconAsset, s(14), iconColor)
-		btn.MouseEnter:Connect(function() Tween(btn, {BackgroundTransparency=0.82}) end)
-		btn.MouseLeave:Connect(function() Tween(btn, {BackgroundTransparency=0.92}) end)
-		return btn
-	end
-
-	local minBtn = makeBtn(0, Icons.minimize, Color3.fromRGB(220,220,230))
-	minBtn.MouseButton1Click:Connect(function()
-		if not self.dialogOpen then self:_toggleMin() end
-	end)
-
-	local closeBtn = makeBtn(s(40), Icons.close, Color3.fromRGB(255,100,100))
-	closeBtn.MouseButton1Click:Connect(function()
-		if not self.dialogOpen then self:_closeDialog() end
-	end)
 end
 
 function HorizonUI:_buildSidebar()
@@ -333,9 +361,10 @@ function HorizonUI:_buildUserCard()
 	local theme  = self:_theme()
 	local player = self.player
 
+	-- Kart boyutunu biraz büyüttük (3 satır için: DisplayName + @username + status)
 	local card = Instance.new("Frame")
-	card.Size               = UDim2.new(1, -s(24), 0, s(62))
-	card.Position           = UDim2.new(0, s(12), 1, -s(76))
+	card.Size               = UDim2.new(1, -s(24), 0, s(72))
+	card.Position           = UDim2.new(0, s(12), 1, -s(84))
 	card.BackgroundColor3   = Color3.fromRGB(255,255,255)
 	card.BackgroundTransparency = 0.94
 	card.BorderSizePixel    = 0
@@ -343,32 +372,70 @@ function HorizonUI:_buildUserCard()
 	MakeCorner(card, s(12))
 	self._userCardStroke = MakeStroke(card, theme.stroke, 0.6, 1)
 
-	local avatarSize = s(38)
-	local avatar = Instance.new("Frame")
-	avatar.Size             = UDim2.new(0, avatarSize, 0, avatarSize)
-	avatar.Position         = UDim2.new(0, s(10), 0.5, -avatarSize/2)
-	avatar.BackgroundColor3 = theme.accent1
-	avatar.BorderSizePixel  = 0
-	avatar.Parent           = card
-	MakeCorner(avatar, avatarSize)
-	self._avatarGrad = MakeGradient(avatar, theme.accent1, theme.accent2)
+	-- ── Avatar (yuvarlak profil fotoğrafı) ──
+	local avatarSize = s(44)
+	local avatarHolder = Instance.new("Frame")
+	avatarHolder.Size             = UDim2.new(0, avatarSize, 0, avatarSize)
+	avatarHolder.Position         = UDim2.new(0, s(10), 0.5, -avatarSize/2)
+	avatarHolder.BackgroundColor3 = theme.accent1
+	avatarHolder.BorderSizePixel  = 0
+	avatarHolder.Parent           = card
+	MakeCorner(avatarHolder, avatarSize)
+	self._avatarGrad = MakeGradient(avatarHolder, theme.accent1, theme.accent2)
 
+	-- Fallback: baş harf (profil yüklenene kadar görünür)
 	local initLabel = Instance.new("TextLabel")
 	initLabel.Size              = UDim2.new(1, 0, 1, 0)
 	initLabel.BackgroundTransparency = 1
 	initLabel.Text              = string.upper(string.sub(player.Name, 1, 1))
 	initLabel.TextColor3        = Color3.fromRGB(255,255,255)
-	initLabel.TextSize          = s(16)
+	initLabel.TextSize          = s(18)
 	initLabel.Font              = Enum.Font.GothamBold
-	initLabel.Parent            = avatar
+	initLabel.Parent            = avatarHolder
 
-	local nameX = avatarSize + s(14)
+	-- Gerçek profil fotoğrafı (async yükleme)
+	local avatarImg = Instance.new("ImageLabel")
+	avatarImg.Size               = UDim2.new(1, 0, 1, 0)
+	avatarImg.BackgroundTransparency = 1
+	avatarImg.Image              = ""
+	avatarImg.ScaleType          = Enum.ScaleType.Crop
+	avatarImg.Visible            = false
+	avatarImg.Parent             = avatarHolder
+	MakeCorner(avatarImg, avatarSize)
 
+	task.spawn(function()
+		local ok, url = pcall(function()
+			return Players:GetUserThumbnailAsync(
+				player.UserId,
+				Enum.ThumbnailType.HeadShot,
+				Enum.ThumbnailSize.Size420x420
+			)
+		end)
+		if ok and url and url ~= "" then
+			avatarImg.Image   = url
+			avatarImg.Visible = true
+			initLabel.Visible = false
+			-- Gradient arka planı temizle (fotoğraf varken gereksiz)
+			local g = avatarHolder:FindFirstChildOfClass("UIGradient")
+			if g then
+				Tween(avatarHolder, {BackgroundTransparency=1}, 0.3)
+			end
+		end
+	end)
+
+	-- İnce aksan kenarlığı (profil çerçevesi)
+	MakeStroke(avatarHolder, theme.accent1, 0.3, 2)
+
+	-- ── Metin alanı ──
+	local nameX = avatarSize + s(12)
+
+	-- Display Name (büyük, kalın)
+	local displayName = player.DisplayName ~= "" and player.DisplayName or player.Name
 	local nameLabel = Instance.new("TextLabel")
-	nameLabel.Size              = UDim2.new(1, -(nameX + s(8)), 0, s(20))
-	nameLabel.Position          = UDim2.new(0, nameX, 0, s(10))
+	nameLabel.Size              = UDim2.new(1, -(nameX + s(8)), 0, s(18))
+	nameLabel.Position          = UDim2.new(0, nameX, 0, s(8))
 	nameLabel.BackgroundTransparency = 1
-	nameLabel.Text              = player.Name
+	nameLabel.Text              = displayName
 	nameLabel.TextColor3        = theme.text
 	nameLabel.TextSize          = s(12)
 	nameLabel.Font              = Enum.Font.GothamBold
@@ -376,14 +443,28 @@ function HorizonUI:_buildUserCard()
 	nameLabel.TextTruncate      = Enum.TextTruncate.AtEnd
 	nameLabel.Parent            = card
 
+	-- @username (küçük, soluk)
+	local usernameLabel = Instance.new("TextLabel")
+	usernameLabel.Size              = UDim2.new(1, -(nameX + s(8)), 0, s(14))
+	usernameLabel.Position          = UDim2.new(0, nameX, 0, s(27))
+	usernameLabel.BackgroundTransparency = 1
+	usernameLabel.Text              = "@" .. player.Name
+	usernameLabel.TextColor3        = theme.subtext
+	usernameLabel.TextSize          = s(10)
+	usernameLabel.Font              = Enum.Font.Gotham
+	usernameLabel.TextXAlignment    = Enum.TextXAlignment.Left
+	usernameLabel.TextTruncate      = Enum.TextTruncate.AtEnd
+	usernameLabel.Parent            = card
+
+	-- Status (accent rengi, en alt)
 	self._statusLabel = Instance.new("TextLabel")
-	self._statusLabel.Size              = UDim2.new(1, -(nameX + s(8)), 0, s(16))
-	self._statusLabel.Position          = UDim2.new(0, nameX, 0, s(32))
+	self._statusLabel.Size              = UDim2.new(1, -(nameX + s(8)), 0, s(13))
+	self._statusLabel.Position          = UDim2.new(0, nameX, 0, s(43))
 	self._statusLabel.BackgroundTransparency = 1
-	self._statusLabel.Text              = "Premium User"
+	self._statusLabel.Text              = "✦ Premium User"
 	self._statusLabel.TextColor3        = theme.accent1
-	self._statusLabel.TextSize          = s(10)
-	self._statusLabel.Font              = Enum.Font.Gotham
+	self._statusLabel.TextSize          = s(9)
+	self._statusLabel.Font              = Enum.Font.GothamBold
 	self._statusLabel.TextXAlignment    = Enum.TextXAlignment.Left
 	self._statusLabel.Parent            = card
 end
@@ -552,8 +633,8 @@ function HorizonUI:_closeDialog()
 		return btn
 	end
 
-	local cancelBtn  = makeBtn(s(18),         "Iptal", Color3.fromRGB(255,255,255), 0.88)
-	local confirmBtn = makeBtn(bW + s(24),    "Kapat", Color3.fromRGB(220,40,40),   0.18)
+	local cancelBtn  = makeBtn(s(18),      "Iptal", Color3.fromRGB(255,255,255), 0.88)
+	local confirmBtn = makeBtn(bW + s(24), "Kapat", Color3.fromRGB(220,40,40),   0.18)
 
 	cancelBtn.MouseButton1Click:Connect(function() overlay:Destroy(); self.dialogOpen = false end)
 	confirmBtn.MouseButton1Click:Connect(function() self:Destroy() end)
@@ -612,7 +693,7 @@ function HorizonUI:_applyTheme(idx)
 end
 
 function HorizonUI:SetStatus(text)
-	if self._statusLabel then self._statusLabel.Text = text end
+	if self._statusLabel then self._statusLabel.Text = "✦ " .. text end
 end
 
 function HorizonUI:Destroy()
